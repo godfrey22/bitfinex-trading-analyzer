@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trading History Analysis</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="controls-section">
+            <div class="controls-grid">
+                <div class="primary-controls">
+                    <input type="file" id="csvFile" accept=".csv" multiple>
+                    <select id="pairSelect">
+                        <option value="">Select pair</option>
+                    </select>
+                    <select id="timeRange">
+                        <option value="all">All time</option>
+                        <option value="day">Today</option>
+                        <option value="week">This week</option>
+                        <option value="month">This month</option>
+                    </select>
+                </div>
+                
+                <input type="text" id="searchTrades" placeholder="Search trades...">
+                
+                <div class="control-buttons">
+                    <button class="settings-toggle" id="settingsToggle">
+                        <i class="fas fa-cog"></i>
+                    </button>
+                    <button id="togglePairingMode" class="toggle-pairing-mode">
+                        <i class="fas fa-link"></i> Pair Trades
+                    </button>
+                    <button id="expandAll" class="btn">
+                        <i class="fas fa-expand"></i> Expand All
+                    </button>
+                </div>
+            </div>
+            
+            <div class="settings-panel" id="settingsPanel">
+                <div class="filter-group">
+                    <label for="debugToggle">Debug Mode:</label>
+                    <input type="checkbox" id="debugToggle">
+                    <button id="exportErrors" class="btn">Export Error Log</button>
+                </div>
+                <div class="filter-group">
+                    <label for="dateFormat">Date Format:</label>
+                    <select id="dateFormat">
+                        <option value="DD-MM-YY HH:mm:ss">DD-MM-YY HH:mm:ss</option>
+                        <option value="YYYY-MM-DD HH:mm:ss">YYYY-MM-DD HH:mm:ss</option>
+                        <option value="MM/DD/YYYY HH:mm:ss">MM/DD/YYYY HH:mm:ss</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="summary-grid">
+            <div class="metric-card" id="positionCard">
+                <div class="metric-title">Current Position</div>
+                <div class="metric-value">0.00</div>
+                <div class="metric-change">
+                    <i class="fas fa-chart-line"></i>
+                    <span>0.00%</span>
+                </div>
+            </div>
+
+            <div class="metric-card" id="pnlCard">
+                <div class="metric-title">Total P&L</div>
+                <div class="metric-value">$0.00</div>
+                <div class="metric-change">
+                    <i class="fas fa-percentage"></i>
+                    <span>0.00%</span>
+                </div>
+            </div>
+
+            <div class="metric-card" id="volumeCard">
+                <div class="metric-title">Total Volume</div>
+                <div class="metric-value">0.00</div>
+            </div>
+
+            <div class="metric-card" id="feesCard">
+                <div class="metric-title">Total Fees</div>
+                <div class="metric-value">$0.00</div>
+            </div>
+        </div>
+
+        <div class="trades-container">
+            <div id="tradesList"></div>
+        </div>
+
+        <div class="paired-trades-view" id="pairedTradesView">
+            <div class="trade-cycles-controls">
+                <div class="filters">
+                    <div class="cycle-filters">
+                        <select id="cycleTimeRange">
+                            <option value="all">All Time</option>
+                            <option value="month">Last Month</option>
+                            <option value="quarter">Last Quarter</option>
+                            <option value="year">Last Year</option>
+                        </select>
+                    </div>
+                    <button id="exportCycles" class="btn">
+                        <i class="fas fa-download"></i> Export Trade Cycles
+                    </button>
+                </div>
+            </div>
+
+            <div class="cycles-summary">
+                <div class="summary-grid">
+                    <div class="metric-card">
+                        <div class="metric-title">Total Cycles</div>
+                        <div class="metric-value" id="totalCycles">0</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-title">Average Hold Time</div>
+                        <div class="metric-value" id="avgHoldTime">0d 0h</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-title">Success Rate</div>
+                        <div class="metric-value" id="successRate">0%</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-title">Average ROI</div>
+                        <div class="metric-value" id="avgRoi">0%</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="visualization-grid">
+                <div class="chart-card">
+                    <h3>ROI Distribution</h3>
+                    <canvas id="roiDistributionChart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>Hold Time vs ROI</h3>
+                    <canvas id="holdTimeRoiChart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>Performance Heatmap</h3>
+                    <div id="performanceHeatmap"></div>
+                </div>
+            </div>
+
+            <div class="trade-cycles-table">
+                <div class="table-header">
+                    <div class="cycle-filters">
+                        <select id="quoteCurrencySelect" class="quote-currency-select">
+                            <option value="">All Quote Currencies</option>
+                        </select>
+                        <select id="cycleTimeRange">
+                            <option value="all">All Time</option>
+                            <option value="month">Last Month</option>
+                            <option value="quarter">Last Quarter</option>
+                            <option value="year">Last Year</option>
+                        </select>
+                        <button id="exportCycles" class="btn">
+                            <i class="fas fa-download"></i> Export Trade Cycles
+                        </button>
+                    </div>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Cycle</th>
+                            <th>Entry → Exit</th>
+                            <th>Duration</th>
+                            <th>Position</th>
+                            <th>Entry Price</th>
+                            <th>Exit Price</th>
+                            <th>Price Δ%</th>
+                            <th>ROI</th>
+                            <th>P&L</th>
+                            <th>Fees (USD)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tradeCyclesBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="pairing-controls" id="pairingControls">
+            <div class="pairing-header">
+                <button id="confirmPair" class="btn">Create Pair</button>
+                <select id="pairFilter">
+                    <option value="all">All Trades</option>
+                    <option value="paired">Paired Trades</option>
+                    <option value="unpaired">Unpaired Trades</option>
+                </select>
+                <button id="exportPairs" class="btn">
+                    <i class="fas fa-download"></i> Export Analysis
+                </button>
+            </div>
+            <div id="pairsSummary"></div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@1.0.1/dist/chartjs-adapter-moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="script.js"></script>
+</body>
+</html> 
